@@ -9,6 +9,9 @@ class AppCache {
     }
     return _prefs!;
   }
+  static void clear() async {
+    await _prefs?.clear();
+  }
 
   static String getString(String key) => _prefs?.getString(key) ?? "";
 

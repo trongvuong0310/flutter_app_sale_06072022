@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../../../common/constants/api_constant.dart';
 import '../../../common/widgets/loading_widget.dart';
+import '../../../data/datasources/local/cache/app_cache.dart';
 import '../../../data/datasources/remote/api_request.dart';
 import '../../../data/model/cart.dart';
 class HomePage extends StatefulWidget {
@@ -29,7 +30,8 @@ class _HomePageState extends State<HomePage> {
         leading: IconButton(
           icon: Icon(Icons.logout),
           onPressed: (){
-
+            AppCache.clear();
+            Navigator.pushNamedAndRemoveUntil(context, "/sign_in", (r) => false);
           },
         ),
         actions: [
