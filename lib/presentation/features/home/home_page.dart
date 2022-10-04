@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common/constants/api_constant.dart';
+import '../../../common/constants/variable_constant.dart';
 import '../../../common/widgets/loading_widget.dart';
 import '../../../data/datasources/local/cache/app_cache.dart';
 import '../../../data/datasources/remote/api_request.dart';
@@ -22,19 +23,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  void logoutUser() {
+    AppCache.clear();
+    Navigator.pushNamedAndRemoveUntil(context, VariableConstant.SIGN_IN_ROUTE, (Route<dynamic> route) => false);
+  }
   @override
   Widget build(BuildContext context) {
     return PageContainer(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text("Home"),
         leading: IconButton(
           icon: Icon(Icons.logout),
-          onPressed: (){
-            AppCache.clear();
-            Navigator.pushNamedAndRemoveUntil(context, "/sign_in", (r) => false);
-          },
+          onPressed: logoutUser,
         ),
         actions: [
+          Container(
+            margin: EdgeInsets.only(right: 10, top: 10),
+            child: IconButton(
+              icon: Icon(Icons.history),
+              onPressed: () {
+                Navigator.pushNamed(context, VariableConstant.ORDER_HISTORY_ROUTE);
+              },
+            )
+          ),
           Consumer<HomeBloc>(
             builder: (context, bloc, child){
               return StreamBuilder<Cart>(
@@ -49,7 +61,16 @@ class _HomePageState extends State<HomePage> {
                       margin: EdgeInsets.only(right: 10, top: 10),
                       child: Badge(
                         badgeContent: Text(count.toString(), style: const TextStyle(color: Colors.white),),
-                        child: Icon(Icons.shopping_cart_outlined),
+                        child: IconButton(
+                          icon: Icon(Icons.shopping_cart_outlined),
+                          onPressed: () {
+                            Navigator.pushNamed(context, VariableConstant.CART_ROUTE).then((cartUpdate){
+                              if(cartUpdate != null){
+                                bloc.cartController.sink.add(cartUpdate as Cart);
+                              }
+                            });
+                          },
+                        )
                       ),
                     );
                   }
@@ -102,6 +123,7 @@ class _HomeContainerState extends State<HomeContainer> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Container(
+          padding: EdgeInsets.all(5),
           child: Stack(
             children: [
               StreamBuilder<List<Product>>(
@@ -137,88 +159,108 @@ class _HomeContainerState extends State<HomeContainer> {
   Widget _buildItemFood(Product? product) {
     if (product == null) return Container();
     return SizedBox(
-      height: 135,
-      child: Card(
-        elevation: 5,
-        shadowColor: Colors.blueGrey,
-        child: Container(
-          padding: const EdgeInsets.only(top: 5, bottom: 5),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(5),
-                child: Image.network(ApiConstant.BASE_URL + product.img,
-                    width: 150, height: 120, fit: BoxFit.fill),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: Text(product.name.toString(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 16)),
-                      ),
-                      Text(
-                          "Giá : ${NumberFormat("#,###", "en_US")
-                                  .format(product.price)} đ",
-                          style: const TextStyle(fontSize: 12)),
-                      Row(
-                          children:[
-                            ElevatedButton(
-                              onPressed: () {
-
-                              },
-                              style: ButtonStyle(
-                                  backgroundColor:
-                                  MaterialStateProperty.resolveWith((states) {
-                                    if (states.contains(MaterialState.pressed)) {
-                                      return const Color.fromARGB(200, 240, 102, 61);
-                                    } else {
-                                      return const Color.fromARGB(230, 240, 102, 61);
-                                    }
-                                  }),
-                                  shape: MaterialStateProperty.all(
-                                      const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10))))),
-                              child:
-                              const Text("Thêm vào giỏ", style: TextStyle(fontSize: 14)),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 5),
-                              child: ElevatedButton(
-                                onPressed: () {
+      child: Container(
+        margin: const EdgeInsets.only( bottom: 5),
+        child: Card(
+          elevation: 5,
+          shadowColor: Colors.blueGrey,
+          child: Container(
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(5), topLeft: Radius.circular(5)),
+                  child: Image.network(ApiConstant.BASE_URL + product.img,
+                      width: 120, height: 120, fit: BoxFit.cover),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: Text(product.name.toString(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 16)),
+                        ),
+                        Row(
+                          children: [
+                            Text("Price : "),
+                            Text("${NumberFormat("#,###", "en_US")
+                                .format(product.price)} đ",
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.red)),
+                          ],
+                        ),
+                        Row(
+                            children:[
+                              ElevatedButton(
+                                onPressed: (){
+                                  //_homeBloc.eventSink.add(AddToCartEvent(id: product.id));
                                 },
                                 style: ButtonStyle(
                                     backgroundColor:
                                     MaterialStateProperty.resolveWith((states) {
                                       if (states.contains(MaterialState.pressed)) {
-                                        return const Color.fromARGB(200, 11, 22, 142);
+                                        return Colors.red;
                                       } else {
-                                        return const Color.fromARGB(230, 11, 22, 142);
+                                        return const Color.fromARGB(230, 240, 102, 61);
                                       }
                                     }),
                                     shape: MaterialStateProperty.all(
                                         const RoundedRectangleBorder(
                                             borderRadius: BorderRadius.all(
-                                                Radius.circular(10))))),
-                                child:
-                                Text("Chi tiết", style: const TextStyle(fontSize: 14)),
+                                                Radius.circular(3))))),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.add_shopping_cart_outlined, size: 15.0),
+                                    SizedBox(width: 5),
+                                    Text("Add to cart", style: TextStyle(fontSize: 14))
+                                  ],
+                                ),
                               ),
-                            ),
-                          ]
-                      ),
-                    ],
+                              Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, VariableConstant.PRODUCT_DETAIL_ROUTE, arguments: product);
+                                  },
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                      MaterialStateProperty.resolveWith((states) {
+                                        if (states.contains(MaterialState.pressed)) {
+                                          return Colors.red;
+                                        } else {
+                                          return Colors.blue;
+                                        }
+                                      }),
+                                      shape: MaterialStateProperty.all(
+                                          const RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(3)
+                                              )
+                                          )
+                                      )
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.remove_red_eye_outlined, size: 15.0),
+                                      SizedBox(width: 5),
+                                      Text("Detail", style: const TextStyle(fontSize: 14))
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ]
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

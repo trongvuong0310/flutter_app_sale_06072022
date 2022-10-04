@@ -33,4 +33,28 @@ class ApiRequest {
   Future getCart() {
     return _dio.get(ApiConstant.CART_URL);
   }
+
+  Future addToCart(String id) {
+    return _dio.post(ApiConstant.ADD_TO_CART_URL, data: {
+      "id_product": id,
+    });
+  }
+
+  Future updateCart(String idCart, num quantity, String idProduct) {
+    return _dio.post(ApiConstant.UPDATE_CART_URL, data: {
+      "id_cart": idCart,
+      "quantity": quantity,
+      "id_product": idProduct
+    });
+  }
+
+  Future conformCart(String idCart) {
+    return _dio.post(ApiConstant.CONFORM_CART_URL, data: {
+      "id_cart": idCart
+    });
+  }
+
+  Future getOrders() {
+    return _dio.post(ApiConstant.ORDER_HISTORY_URL);
+  }
 }
