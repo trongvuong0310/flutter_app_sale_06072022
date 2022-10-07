@@ -67,7 +67,7 @@ class BuildContainerOrder extends StatefulWidget {
 }
 
 class _BuildContainerOrderState extends State<BuildContainerOrder> {
-  List<Order>? _orderModel;
+  List<Order>? _order;
   late OrderBloc _orderBloc;
 
   @override
@@ -81,7 +81,7 @@ class _BuildContainerOrderState extends State<BuildContainerOrder> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async{
-        Navigator.pop(context, _orderModel);
+        Navigator.pop(context, _order);
         return true;
       },
       child: SafeArea(
@@ -92,7 +92,6 @@ class _BuildContainerOrderState extends State<BuildContainerOrder> {
                     initialData: null,
                     stream: _orderBloc.orderController.stream,
                     builder: (context, snapshot) {
-                      print(snapshot);
                       if (snapshot.hasError) {
                         return const Center(
                             child: Text(
@@ -104,7 +103,7 @@ class _BuildContainerOrderState extends State<BuildContainerOrder> {
                         );
                       }
                       if (snapshot.hasData) {
-                        _orderModel = snapshot.data;
+                        _order = snapshot.data;
                         if (snapshot.data?.length == 0) {
                           return const Center(
                               child: Text(

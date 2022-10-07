@@ -176,6 +176,14 @@ class _ProductContainerState extends State<ProductContainer> {
                   )
                 ],
               ),
+              Stack(
+                children: [
+                  LoadingWidget(
+                    bloc: _cartBloc,
+                    child: Container(),
+                  )
+                ],
+              ),
               TopRoundedContainer(
                 color: Color(0xFFF2F2F2),
                 child: Padding(
@@ -196,10 +204,7 @@ class _ProductContainerState extends State<ProductContainer> {
             ],
           ),
         ),
-        LoadingWidget(
-          bloc: _cartBloc,
-          child: Container(),
-        )
+
       ],
     );
   }

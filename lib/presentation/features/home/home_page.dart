@@ -26,10 +26,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  void logoutUser() {
-    AppCache.clear();
-    Navigator.pushReplacementNamed(context, VariableConstant.SIGN_IN_ROUTE);
-  }
+
   @override
   Widget build(BuildContext context) {
     return PageContainer(
@@ -38,7 +35,10 @@ class _HomePageState extends State<HomePage> {
         title: const Text("Home"),
         leading: IconButton(
           icon: Icon(Icons.logout),
-          onPressed: logoutUser,
+          onPressed: (){
+            Navigator.of(context).pushNamedAndRemoveUntil(VariableConstant.HOME_ROUTE , (Route<dynamic> route) => false);
+          },
+
         ),
         actions: [
           Container(

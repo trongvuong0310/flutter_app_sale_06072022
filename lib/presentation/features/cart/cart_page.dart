@@ -105,13 +105,33 @@ class _CartContainerState extends State<CartContainer> {
                       if (snapshot.hasData) {
                         _cart = snapshot.data;
                         if (snapshot.data!.products.isEmpty) {
-                          return const Center(
-                              child: Text(
-                                'Your Cart is Empty',
-                                style:
-                                TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 18.0),
-                              )
+                          return  Container(
+                              height: MediaQuery.of(context).size.height,
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Payment success. Thank you.',
+                                    style:
+                                    TextStyle(
+                                        fontWeight: FontWeight.bold, fontSize: 18.0),
+                                  ),
+                                  ElevatedButton(
+                                      onPressed: (){
+                                        Navigator.of(context).pushNamedAndRemoveUntil(VariableConstant.HOME_ROUTE , (Route<dynamic> route) => false);
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text("Continue to buy"),
+                                          Icon(Icons.add_shopping_cart_outlined)
+                                        ],
+                                      )
+                                  )
+                                ],
+                              ),
                           );
                         }
                         return Column(
