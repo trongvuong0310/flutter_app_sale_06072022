@@ -1,4 +1,4 @@
-import 'package:flutter_app_sale_06072022/data/datasources/remote/dto/product_dto.dart';
+import 'product_dto.dart';
 
 class CartDto {
   CartDto({

@@ -9,4 +9,5 @@ class VariableConstant {
   static final String PRODUCT_DETAIL_ROUTE = "/product_detail";
   static final String CART_ROUTE = "/cart";
   static final String ORDER_HISTORY_ROUTE = "/order_history";
+  static final String ORDER_DETAIL_ROUTE = "/order_detail";
 }

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_sale_06072022/common/bases/base_widget.dart';
 import 'package:flutter_app_sale_06072022/data/model/product.dart';
+import 'package:flutter_app_sale_06072022/data/repositories/cart_repository.dart';
 import 'package:flutter_app_sale_06072022/data/repositories/product_repository.dart';
 import 'package:flutter_app_sale_06072022/presentation/features/home/home_bloc.dart';
 import 'package:flutter_app_sale_06072022/presentation/features/home/home_event.dart';
@@ -15,6 +16,8 @@ import '../../../common/widgets/loading_widget.dart';
 import '../../../data/datasources/local/cache/app_cache.dart';
 import '../../../data/datasources/remote/api_request.dart';
 import '../../../data/model/cart.dart';
+import '../cart/cart_bloc.dart';
+import '../cart/cart_event.dart';
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -25,7 +28,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   void logoutUser() {
     AppCache.clear();
-    Navigator.pushNamedAndRemoveUntil(context, VariableConstant.SIGN_IN_ROUTE, (Route<dynamic> route) => false);
+    Navigator.pushReplacementNamed(context, VariableConstant.SIGN_IN_ROUTE);
   }
   @override
   Widget build(BuildContext context) {
@@ -47,7 +50,7 @@ class _HomePageState extends State<HomePage> {
               },
             )
           ),
-          Consumer<HomeBloc>(
+          Consumer<CartBloc>(
             builder: (context, bloc, child){
               return StreamBuilder<Cart>(
                   initialData: null,
@@ -88,11 +91,25 @@ class _HomePageState extends State<HomePage> {
               ..updateRequest(request);
           },
         ),
+        ProxyProvider<ApiRequest, CartRepository>(
+          update: (context, request, repository) {
+            repository?.updateRequest(request);
+            return repository ?? CartRepository()
+              ..updateRequest(request);
+          },
+        ),
         ProxyProvider<ProductRepository, HomeBloc>(
           update: (context, repository, bloc) {
             bloc?.updateProductRepository(repository);
             return bloc ?? HomeBloc()
               ..updateProductRepository(repository);
+          },
+        ),
+        ProxyProvider<CartRepository, CartBloc>(
+          update: (context, repository, bloc) {
+            bloc?.updateCartRepository(repository);
+            return bloc ?? CartBloc()
+              ..updateCartRepository(repository);
           },
         ),
       ],
@@ -110,13 +127,15 @@ class HomeContainer extends StatefulWidget {
 
 class _HomeContainerState extends State<HomeContainer> {
   late HomeBloc _homeBloc;
+  late CartBloc _cartBloc;
 
   @override
   void initState() {
     super.initState();
     _homeBloc = context.read<HomeBloc>();
+    _cartBloc = context.read<CartBloc>();
     _homeBloc.eventSink.add(GetListProductEvent());
-    _homeBloc.eventSink.add(GetCartEvent());
+    _cartBloc.eventSink.add(GetCartEvent());
   }
 
   @override
@@ -186,6 +205,7 @@ class _HomeContainerState extends State<HomeContainer> {
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 16)),
                         ),
+                        SizedBox(height: 5,),
                         Row(
                           children: [
                             Text("Price : "),
@@ -194,11 +214,12 @@ class _HomeContainerState extends State<HomeContainer> {
                             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.red)),
                           ],
                         ),
+                        SizedBox(height: 10,),
                         Row(
                             children:[
                               ElevatedButton(
                                 onPressed: (){
-                                  //_homeBloc.eventSink.add(AddToCartEvent(id: product.id));
+                                  _cartBloc.eventSink.add(AddToCartEvent(id: product.id));
                                 },
                                 style: ButtonStyle(
                                     backgroundColor:
@@ -224,8 +245,12 @@ class _HomeContainerState extends State<HomeContainer> {
                               Padding(
                                 padding: const EdgeInsets.only(left: 5),
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pushNamed(context, VariableConstant.PRODUCT_DETAIL_ROUTE, arguments: product);
+                                  onPressed: () async{
+                                    await Navigator.pushNamed(context, VariableConstant.PRODUCT_DETAIL_ROUTE, arguments: product).then((result) {
+                                      if(result != null && result == true){
+                                        _cartBloc.eventSink.add(GetCartEvent());
+                                      }
+                                    });
                                   },
                                   style: ButtonStyle(
                                       backgroundColor:
@@ -248,7 +273,7 @@ class _HomeContainerState extends State<HomeContainer> {
                                     children: [
                                       Icon(Icons.remove_red_eye_outlined, size: 15.0),
                                       SizedBox(width: 5),
-                                      Text("Detail", style: const TextStyle(fontSize: 14))
+                                      Text("View more", style: const TextStyle(fontSize: 14))
                                     ],
                                   ),
                                 ),

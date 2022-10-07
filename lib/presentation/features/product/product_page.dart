@@ -3,9 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_sale_06072022/common/bases/base_widget.dart';
 import 'package:flutter_app_sale_06072022/data/model/product.dart';
-import 'package:flutter_app_sale_06072022/data/repositories/product_repository.dart';
-import 'package:flutter_app_sale_06072022/presentation/features/product/product_bloc.dart';
-import 'package:flutter_app_sale_06072022/presentation/features/product/product_event.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -14,21 +11,24 @@ import '../../../common/constants/variable_constant.dart';
 import '../../../common/widgets/loading_widget.dart';
 import '../../../data/datasources/remote/api_request.dart';
 import '../../../data/model/cart.dart';
-class ProductDetailPage extends StatefulWidget {
-  const ProductDetailPage({Key? key}) : super(key: key);
+import '../../../data/repositories/cart_repository.dart';
+import '../cart/cart_bloc.dart';
+import '../cart/cart_event.dart';
+class ProductPage extends StatefulWidget {
+  const ProductPage({Key? key}) : super(key: key);
 
   @override
-  State<ProductDetailPage> createState() => _ProductDetailPageState();
+  State<ProductPage> createState() => _ProductPageState();
 }
 
-class _ProductDetailPageState extends State<ProductDetailPage> {
+class _ProductPageState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
     return PageContainer(
       appBar: AppBar(
         title: const Text("Product detail"),
         actions: [
-          Consumer<ProductBloc>(
+          Consumer<CartBloc>(
             builder: (context, bloc, child){
               return StreamBuilder<Cart>(
                   initialData: null,
@@ -39,7 +39,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     }
                     int count = snapshot.data?.products.length ?? 0;
                     return Container(
-                      margin: EdgeInsets.only(right: 10, top: 10),
+                      margin: EdgeInsets.only(right: 20, top: 10),
                       child: Badge(
                           badgeContent: Text(count.toString(), style: const TextStyle(color: Colors.white),),
                           child: IconButton(
@@ -59,21 +59,25 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             },
           )
         ],
+        leading: new IconButton(
+            icon: new Icon(Icons.arrow_back),
+            onPressed: (){Navigator.pop(context, true);}
+        )
       ),
       providers: [
         Provider(create: (context) => ApiRequest()),
-        ProxyProvider<ApiRequest, ProductRepository>(
+        ProxyProvider<ApiRequest, CartRepository>(
           update: (context, request, repository) {
             repository?.updateRequest(request);
-            return repository ?? ProductRepository()
+            return repository ?? CartRepository()
               ..updateRequest(request);
           },
         ),
-        ProxyProvider<ProductRepository, ProductBloc>(
+        ProxyProvider<CartRepository, CartBloc>(
           update: (context, repository, bloc) {
-            bloc?.updateProductRepository(repository);
-            return bloc ?? ProductBloc()
-              ..updateProductRepository(repository);
+            bloc?.updateCartRepository(repository);
+            return bloc ?? CartBloc()
+              ..updateCartRepository(repository);
           },
         ),
       ],
@@ -91,15 +95,15 @@ class ProductContainer extends StatefulWidget {
 
 class _ProductContainerState extends State<ProductContainer> {
   Product? product;
-  late ProductBloc _productBloc;
+  late CartBloc _cartBloc;
   String selectedImage = "";
   String image = "";
 
   @override
   void initState() {
     super.initState();
-    _productBloc = context.read<ProductBloc>();
-    _productBloc.eventSink.add(GetCartEvent());
+    _cartBloc = context.read<CartBloc>();
+    _cartBloc.eventSink.add(GetCartEvent());
   }
 
   @override
@@ -115,22 +119,16 @@ class _ProductContainerState extends State<ProductContainer> {
       children: [
         Column(
           children: [
-            SizedBox(
-              width: getProportionateScreenWidth(260,context),
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: Hero(
-                  tag: product!.id,
-                  child: Image.network(selectedImage),
-                ),
-              ),
+            Container(
+              padding: EdgeInsets.all(10),
+              child: Image.network(selectedImage,width: double.maxFinite, height: 250, fit: BoxFit.contain,),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                buildGalaryProduct(image),
+                buildImages(image),
                 ...List.generate(product!.gallery.length,
-                        (index) => buildGalaryProduct(ApiConstant.BASE_URL + product!.gallery[index])),
+                        (index) => buildImages(ApiConstant.BASE_URL + product!.gallery[index])),
               ],
             )
           ],
@@ -190,7 +188,7 @@ class _ProductContainerState extends State<ProductContainer> {
                   child: DefaultButton(
                     text: "Add to cart",
                     press: () {
-                      _productBloc.eventSink.add(AddToCartEvent(id: product!.id));
+                      _cartBloc.eventSink.add(AddToCartEvent(id: product!.id));
                     },
                   ),
                 ),
@@ -199,14 +197,14 @@ class _ProductContainerState extends State<ProductContainer> {
           ),
         ),
         LoadingWidget(
-          bloc: _productBloc,
+          bloc: _cartBloc,
           child: Container(),
         )
       ],
     );
   }
 
-  GestureDetector buildGalaryProduct(String url) {
+  GestureDetector buildImages(String url) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -215,13 +213,12 @@ class _ProductContainerState extends State<ProductContainer> {
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: 250),
-        margin: EdgeInsets.only(right: 15),
+        margin: EdgeInsets.only(right: 10),
         padding: EdgeInsets.all(5),
-        height: getProportionateScreenHeight(48, context),
-        width: getProportionateScreenWidth(48, context),
+        height: getProportionateScreenHeight(80, context),
+        width: getProportionateScreenWidth(60, context),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
           border: Border.all(
               color: Color(0xFFFF7643).withOpacity(selectedImage == url ? 1 : 0)),
         ),

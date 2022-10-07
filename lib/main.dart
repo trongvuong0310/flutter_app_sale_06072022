@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app_sale_06072022/common/constants/variable_constant.dart';
 import 'package:flutter_app_sale_06072022/data/datasources/local/cache/app_cache.dart';
+import 'package:flutter_app_sale_06072022/presentation/features/cart/cart_page.dart';
 import 'package:flutter_app_sale_06072022/presentation/features/home/home_page.dart';
+import 'package:flutter_app_sale_06072022/presentation/features/order_detail/order_detail_page.dart';
+import 'package:flutter_app_sale_06072022/presentation/features/order_history/order_page.dart';
 import 'package:flutter_app_sale_06072022/presentation/features/product/product_page.dart';
 import 'package:flutter_app_sale_06072022/presentation/features/sign_in/sign_in_page.dart';
 import 'package:flutter_app_sale_06072022/presentation/features/sign_up/sign_up_page.dart';
 import 'package:flutter_app_sale_06072022/presentation/features/splash/splash_page.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -21,17 +25,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        fontFamily: "QuickSan",
+        //fontFamily: "QuickSan",
         primarySwatch: Colors.blue,
       ),
+      debugShowCheckedModeBanner: false,
       routes: {
         VariableConstant.SIGN_IN_ROUTE: (context) => SignInPage(),
         VariableConstant.SIGN_UP_ROUTE: (context) => SignUpPage(),
         VariableConstant.HOME_ROUTE: (context) => HomePage(),
+        VariableConstant.CART_ROUTE: (context) => CartPage(),
+        VariableConstant.PRODUCT_DETAIL_ROUTE: (context) => ProductPage(),
         VariableConstant.SPLASH_ROUTE: (context) => SplashPage(),
-        VariableConstant.PRODUCT_DETAIL_ROUTE: (context) => ProductDetailPage(),
-        VariableConstant.CART_ROUTE: (context) => ProductDetailPage(),
-        VariableConstant.ORDER_HISTORY_ROUTE: (context) => ProductDetailPage()
+        VariableConstant.ORDER_HISTORY_ROUTE: (context) => OrderPage(),
+        VariableConstant.ORDER_DETAIL_ROUTE: (context) => OrderDetailPage(),
       },
       initialRoute: VariableConstant.SPLASH_ROUTE,
     );
