@@ -166,7 +166,7 @@ class _HomeContainerState extends State<HomeContainer> {
                   }
               ),
               LoadingWidget(
-                bloc: _homeBloc,
+                bloc: _cartBloc,
                 child: Container(),
               )
             ],

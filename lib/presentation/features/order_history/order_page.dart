@@ -185,13 +185,13 @@ class _BuildContainerOrderState extends State<BuildContainerOrder> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ),
-                        Text( '( ' + order.products.length.toString() + " món )",
+                        Text( '( ' + order.products.length.toString() + " items )",
                             style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
                         SizedBox(height: 5,),
                         Row(
                           children: [
                             Text(
-                                "Tổng tiền : ",
+                                "Total : ",
                                 style: TextStyle(fontSize: 12)),
                             Text( NumberFormat("#,###", "en_US")
                                         .format(order.price) +

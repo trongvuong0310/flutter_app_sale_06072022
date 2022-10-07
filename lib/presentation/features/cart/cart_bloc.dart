@@ -98,6 +98,7 @@ class CartBloc extends BaseBloc{
 
   void _addToCart(AddToCartEvent event) async {
     loadingSink.add(true);
+
     try {
       Response response = await _repository.addToCart(event.id);
       AppResponse<CartDto> cartResponse = AppResponse.fromJson(response.data, CartDto.convertJson);
