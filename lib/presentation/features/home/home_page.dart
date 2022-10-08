@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
         leading: IconButton(
           icon: Icon(Icons.logout),
           onPressed: (){
-            Navigator.of(context).pushNamedAndRemoveUntil(VariableConstant.HOME_ROUTE , (Route<dynamic> route) => false);
+            Navigator.of(context).pushNamedAndRemoveUntil(VariableConstant.SIGN_IN_ROUTE , (Route<dynamic> route) => false);
           },
 
         ),
